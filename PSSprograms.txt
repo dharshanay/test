@@ -1,0 +1,296 @@
+ --1--(SYMMETRIC π CONFIGURATION)--1--
+function[a,b,c,d]=med_pi_abcd(); 
+[r x y len]=medinput(); 
+[ir vr pf]=medpow();
+z=len*complex(r,x)
+y=len*complex(0,y) 
+a=(1+(z*y)/2);
+b=z;
+c1=(1+(z*y)/4); 
+c=y*c1;
+d=a;
+x=a*d-b*c
+ABCD=[a b;c d] 
+vsis=ABCD*[vr;ir] 
+vsl_l=sqrt(3)*abs(vsis(1)) 
+is=1000*abs(vsis(2)) 
+vrl_l=vr*sqrt(3) 
+reg=(((vsl_l/abs(a))-vrl_l)/vrl_l)*100 
+function[r,x,y,len]=medinput();
+r=0.036; 
+x=0.3;
+y=4.22e-6; 
+len=130;
+function [ir,vr,pf]=medpow();
+sr=270; 
+vr=325; 
+pf=0.8; 
+theta=acos(pf); 
+pr=cos(theta);
+qr=sin(theta);
+SR=sr*complex(pr,-qr); 
+vr=complex(vr/sqrt(3),0);
+ir=(SR/3)/conj(vr);
+
+
+--1--(SYMMETRIC T CONFIGURATION)--1--
+function[a,b,c,d]=med_tee_abcd();
+[r x y len]=medinput();
+[ir vr pf]=medpow()
+z=len*complex(r,x)
+y=len*complex(0,y)
+a=(1+(z*y)/2);
+b1=(1+(z*y)/4);
+b=z*b1;
+c=y;
+d=a;
+x=a*d-b*c
+ABCD=[a b;c d]
+vsis=ABCD*[vr;ir]
+vsl_l=sqrt(3)*abs(vsis(1))
+is=1000*abs(vsis(2))
+vrl_l=vr*sqrt(3)
+reg=(((vsl_l/abs(a))-vrl_l)/vrl_l)*100
+function[r,x,y,len]=medinput();
+r=0.036; 
+x=0.3; 
+y=4.22e-6; 
+len=130; 
+function [ir,vr,pf]=medpow();
+sr=270; 
+vr=325; 
+pf=0.8;
+theta=acos(pf);
+pr=cos(theta);
+
+
+
+--1--ABCD PARAMETERS OF LONG TRANSMISSION LINE--1--
+function[a,b,c,d]=long_abcd(); 
+[z y len]=long_input(); 
+[ir vr pf]=longpow(); 
+gamma=sqrt(z*y);
+zc=sqrt(z/y); 
+a=cosh(gamma*len)
+b=zc*sinh(gamma*len)
+c=(1/zc)*sinh(gamma*len)
+d=a
+x=a*d-b*c
+ABCD=[a b;c d]
+vsis=ABCD*[vr;ir]
+vsl_l=sqrt(3)*abs(vsis(1))
+is=1000*abs(vsis(2))
+vrl_l=sqrt(3)*vr
+reg=(((vsl_l/abs(a))-vrl_l)/vrl_l)*100
+function[z,y,len]=long_input();
+z=0.045+j*0.4; 
+y=j*4e-6; 
+len=250; 
+function[ir,vr,pf]=longpow();
+sr=270; 
+vr=325; 
+pf=0.8; 
+theta=acos(pf);
+pr=cos(theta);
+qr=sin(theta);
+SR=sr*complex(pr,-qr)
+vr=complex(vr/sqrt(3),0)
+ir=(SR/3)/conj(vr);
+
+--2--DETERMINATION OF POWER ANGLE DIAGRAMS--2--
+--PROGRAM (NON SALIENT POLE MACHINE)--
+vt=1.0; 
+pow=0.5;
+ra=0; 
+pf=0.8; 
+x=0.3; 
+ia=pow/(vt*pf) 
+theta=acos(pf) 
+Ia=complex(ia*cos(theta),-ia*sin(theta));
+z=complex(ra,x); 
+eg=vt+(z*Ia); 
+pm=abs(eg)*abs(vt)/x; 
+del=linspace(0.0,pi,100);
+y=pm*sin(del);
+del=del.*180/pi;
+plot(del,y,'r')
+ 
+--PROGRAM (SALIENT POLE MACHINE)--
+vt=1.0;
+eg=1.1;
+ra=0; 
+xq=0.6; 
+xd=1; 
+Pm1=abs(eg)*abs(vt)/xd;
+Pm2=(abs(vt)^2)*(xd-xq)/(2*xd*xq) 
+del=linspace(0.0,pi,100); 
+y1=Pm1*sin(del);
+y2=Pm2*sin(2*del);
+del=del.*180/pi;
+plot(del,y1,'r')
+plot(del,y2,'b')
+hold on
+y=y1+y2
+plot(del,y,'m')
+
+--4--Y BUS FORMATION--4--
+-- (WITHOUT MUTUAL COUPLING)--
+function[ybus]=transformation(); 
+[data]=ybus_input() 
+nl=length(data) 
+n=max(max(data(:,2)),max(data(:,3))) 
+zprim=zeros(nl,nl) 
+z=complex(data(:,4),data(:,5)) 
+zprim=diag(z)  
+a=zeros(nl,n)
+for i=1:nl 
+ sb=data(i,2)
+ eb=data(i,3)
+ a(i,sb)=-1
+ a(i,eb)=1
+end
+A=a(:,1:n-1)
+yprim=inv(zprim) 
+ybus=A'*yprim*A 
+zbus=inv(ybus)
+function[data] = ybus_input();
+[data]=[ 1 1 2 0.02 0.06;
+ 2 1 3 0.08 0.24;
+ 3 2 3 0.06 0.18;
+ 4 2 4 0.06 0.18;
+ 5 2 5 0.04 0.12;
+ 6 3 4 0.01 0.03;
+ 7 4 5 0.08 0.24;
+ 8 1 6 0.00 -3.0769;
+ 9 2 6 0.00 -18.018;
+ 10 3 6 0.00 -18.018;
+ 11 4 6 0.00 -18.018;
+ 12 5 6 0.00 -25.000;];
+
+--(WITH MUTUAL COUPLING)--
+function[ybus]=ybus_mut(); 
+[data,mut_data]=ybus_input() 
+nl=length(data);
+n=max(max(data(:,2)),max(data(:,3)));
+zprim=zeros(nl,nl); 
+z=complex(data(:,4),data(:,5));
+zprim=diag(z);
+x=length(mut_data(:,1));  
+for i=1:x
+ m1=mut_data(i,1);
+ m2=mut_data(i,2); 
+ zprim(m1,m2)=complex(0,mut_data(i,3));
+ zprim(m2,m1)=complex(0,mut_data(i,3));
+end
+a=zeros(nl,n) 
+for i=1:nl 
+ sb=data(i,2)
+ eb=data(i,3)
+ a(i,sb)=-1
+a(i,eb)=1
+end
+A=a(:,1:n-1)
+yprim=inv(zprim)
+ybus=A'*yprim*A
+zbus=inv(ybus)
+function[data,mut_data]=ybus_input();
+[data]=[ 1 4 2 0.00 0.6;
+ 2 4 3 0.00 0.5;
+ 3 3 1 0.00 0.5;
+ 4 4 2 0.00 0.4;
+ 5 2 1 0.00 0.2;]; 
+[mut_data]=[ 1 4 0.2;
+ 2 1 0.1;];
+
+--5--FORMATION OF Z BUS--5--
+function [zbus]=zbuild(); 
+[data]=input_data();
+n=max(max(data(:,1)),max(data(:,2)))
+nbr=length(data(:,1));
+zbus=zeros(1,1) 
+for i=1:1:nbr 
+ if (data(i,4)==1)
+ sb=data(i,1)
+ eb=data(i,2)
+ if (sb>eb) 
+ temp=sb
+ sb=eb
+ eb=temp
+ end
+ zncol=zbus(:,sb)
+ znrow=zbus(sb,:) 
+ zn_dia=zbus(sb,sb)+data(i,3) 
+ zbus=[zbus zncol;znrow zn_dia] 
+ end
+if (data(i,4)==2)
+ sb=data(i,1)
+ eb=data(i,2)
+ if (sb>eb) 
+ temp=sb
+ sb=eb
+ eb=temp
+ end
+ zncol=zbus(:,sb)-zbus(:,eb) 
+ znrow=zbus(sb,:)-zbus(eb,:) 
+ zn_dia=zbus(sb,sb)+zbus(eb,eb)-2*zbus(sb,eb)+data(i,3) 
+ zbus=[zbus]-[(zncol*znrow)/zn_dia]
+ end
+end
+zbus=zbus(2:n,2:n) 
+ybus=inv(zbus)
+function [data] = input_data();
+[data]= [ 1 2 0.2 1;
+ 3 1 0.4 1;
+ 2 4 0.4 1;
+ 2 3 0.8 2; 
+ 4 3 0.4 2;];
+
+--6--DETERMINATION OF BUS CURRENTS--6--
+function[ybus,line flows]=line_losses(); 
+bmva=100;
+[z_data,vol_data]=pcal_input(); 
+n=max(max(z_data(:,1)),max(z_data(:,2)))
+r=[z_data(:,3)];
+x=[z_data(:,4)];
+z=complex(r,x);
+y=1./z; 
+b=complex(0,z_data(:,5)); 
+a=[z_data(:,6)];
+nbr=length(r);
+ybus=zeros(n,n);
+ for i=1:nbr
+ sb=z_data(i,1);
+ eb=z_data(i,2);
+ ybus(sb,eb)=ybus(sb,eb)-y(i)/a(i);
+ ybus(eb,sb)=ybus(sb,eb);
+ ybus(sb,sb)=ybus(sb,sb)+(y(i)/(a(i)*a(i)))+b(i);
+ ybus(eb,eb)=ybus(eb,eb)+y(i)+b(i);
+ end 
+ybus
+[vr,vi]=pol2cart(vol_data(:,3),vol_data(:,2));
+v=complex(vr,vi)
+i=ybus*v ;  
+s=v.*conj(i);
+ for k=1: nbr
+ i=z_data(k,1);
+ j=z_data(k,2); 
+ Iij=(v(i)-v(j))*(-ybus(i,j))+v(i)*b(k);
+ Sij=(v(i)*conj(Iij))*bmva
+ Iji=(v(j)-v(i))*(-ybus(j,i))+v(j)*b(k);  
+ Sji=(v(j)*conj(Iji))*bmva
+ loss(k)=Sij+Sji 
+ end
+Pl=sum(loss) 
+P2=real(Pl)
+function [z_data,vol_data] = pcal_input();
+z_data=[ 1 2 0.02 0.08 0.01 1;
+ 2 3 0.02 0.08 0.01 1;
+ 3 1 0.02 0.08 0.01 1;];
+vol_data = [ 1 1.04 0;
+ 2 1.081 -0.024;
+ 3 1.04 -0.0655;];
+
+
+
+
+
